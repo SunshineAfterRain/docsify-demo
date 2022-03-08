@@ -101,3 +101,57 @@ function throttle(fn, interval = 100) {
   }
 }
 ```
+
+
+## 实现一个深拷贝
+```js
+function cloneDeep(obj, map = new WeakMap()) {
+  if (obj === null) {
+    return null;
+  }
+
+  if (obj instanceof Date) {
+    // 如果是日期对象直接返回
+    return new Date(obj);
+  }
+
+  if (obj instanceof RegExp) {
+    // 如果是正则对象直接返回
+    return new RegExp(obj);
+  }
+
+  if (typeof obj !== "object") { // 如果不是对象直接返回
+    return obj;
+  }
+
+  // 判断是否存在循环引用
+  if (map.has(obj)) {
+    return map.get(obj);
+  }
+
+  let res = Array.isArray(obj) ? [] : {};
+
+  map.set(obj, res);
+
+  Reflect.ownKeys(obj).forEach((key) => {
+    res[key] = cloneDeep(obj[key], map);
+  });
+
+  return res;
+}
+```
+
+## 实现instanceof方法 
+```js
+//主要判断两边的原型是否相等
+function instanceof(left, right){
+  if(typeof left !== 'object' || left === null) return false
+
+  while(true){
+    if(left === null) return false
+    if(left.__proto__ === right.prototype) return true
+    left = left.__proto__
+  }
+}
+
+```
