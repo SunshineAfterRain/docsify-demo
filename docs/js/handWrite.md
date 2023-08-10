@@ -155,7 +155,7 @@ function instanceof(left, right){
 }
 ```
 
-### 实现并发请求数量控制
+## 实现并发请求数量控制
 
 实现一个并发请求函数concurrencyRequest(urls, maxNum)，要求如下：
 • 要求最大并发数 maxNum
@@ -209,7 +209,7 @@ const concurrencyRequest = (urls, maxNum) => {
 }
 ```
 
-### 实现一个Scheduler类，使下面的代码能正确输出。
+## 实现一个Scheduler类，使下面的代码能正确输出。
 要求实现一个具有并发数量限制的异步任务调度器，可以规定最大同时运行的任务。
 
 实现一个Scheduler类，使下面的代码能正确输出。
