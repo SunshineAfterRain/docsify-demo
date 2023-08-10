@@ -196,52 +196,108 @@
 // trap(arr)
 
 // 深拷贝进阶版
-function cloneDeep(obj, map = new WeakMap()) {
-  if (obj === null) {
-    return null;
-  }
+// function cloneDeep(obj, map = new WeakMap()) {
+//   if (obj === null) {
+//     return null;
+//   }
 
-  if (obj instanceof Date) {
-    // 如果是日期对象直接返回
-    return new Date(obj);
-  }
+//   if (obj instanceof Date) {
+//     // 如果是日期对象直接返回
+//     return new Date(obj);
+//   }
 
-  if (obj instanceof RegExp) {
-    // 如果是正则对象直接返回
-    return new RegExp(obj);
-  }
+//   if (obj instanceof RegExp) {
+//     // 如果是正则对象直接返回
+//     return new RegExp(obj);
+//   }
 
-  if (typeof obj !== "object") {
-    // 如果不是对象直接返回
-    return obj;
-  }
+//   if (typeof obj !== "object") {
+//     // 如果不是对象直接返回
+//     return obj;
+//   }
 
-  // 判断是否存在循环引用
-  if (map.has(obj)) {
-    return map.get(obj);
-  }
+//   // 判断是否存在循环引用
+//   if (map.has(obj)) {
+//     return map.get(obj);
+//   }
 
-  let res = Array.isArray(obj) ? [] : {};
+//   let res = Array.isArray(obj) ? [] : {};
 
-  map.set(obj, res);
+//   map.set(obj, res);
 
-  Reflect.ownKeys(obj).forEach((key) => {
-    res[key] = cloneDeep(obj[key], map);
+//   Reflect.ownKeys(obj).forEach((key) => {
+//     res[key] = cloneDeep(obj[key], map);
+//   });
+
+//   return res;
+// }
+
+// let obj = {
+//   a: {
+//     b: 1,
+//     asd: function asdaaa() {},
+//     ads: new Date(),
+//     [{ asd: 1 }]: {
+//       a: 1,
+//     },
+//   },
+// };
+
+// let newObj = cloneDeep(obj);
+// console.log(newObj);
+
+//实现一个并发请求函数concurrencyRequest(urls, maxNum)，要求如下：
+//• 要求最大并发数 maxNum
+//• 每当有一个请求返回，就留下一个空位，可以增加新的请求
+//• 所有请求完成后，结果按照 urls 里面的顺序依次打出（发送请求的函数可以直接使用fetch即可）
+
+const urls = [
+  "www.baidu.com/1",
+  "www.baidu.com/2",
+  "www.baidu.com/3",
+  "www.baidu.com/4",
+  "www.baidu.com/5",
+  "www.baidu.com/6",
+  "www.baidu.com/7",
+  "www.baidu.com/8",
+  "www.baidu.com/9",
+  "www.baidu.com/10",
+  "www.baidu.com/11",
+  "www.baidu.com/12",
+];
+function concurrencyRequest(urls, maxNum) {
+  return new Promise((resolve, reject) => {
+    if (urls.length == 0) {
+      resolve([]);
+      return;
+    }
+    let index = 0;
+    let results = [];
+    let count = 0; //当前请求完成的数量
+
+    async function request() {
+      if (index === urls.length) return;
+      const i = index;
+      const url = urls[i];
+      index++;
+      console.log(url);
+      try {
+        const resp = await fetch(url);
+        results[i] = resp;
+      } catch (error) {
+        results[i] = error;
+      }
+      count++;
+      if (count === urls.length) {
+        resolve(results);
+      }
+      request();
+    }
+
+    let times = Math.min(maxNum, urls.length);
+    for (let i = 0; i < times; i++) {
+      request();
+    }
   });
-
-  return res;
 }
-
-let obj = {
-  a: {
-    b: 1,
-    asd: function asdaaa() {},
-    ads: new Date(),
-    [{ asd: 1 }]: {
-      a: 1,
-    },
-  },
-};
-
-let newObj = cloneDeep(obj);
-console.log(newObj);
+concurrencyRequest(urls, 1);

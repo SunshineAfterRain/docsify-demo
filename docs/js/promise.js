@@ -11,42 +11,42 @@
 class myPromise {
   constructor(executor) {
     try {
-      executor(this.resolve, this.reject)
+      executor(this.resolve, this.reject);
     } catch (error) {
-      this.reject(error)
+      this.reject(error);
     }
   }
   //状态 一共有三种 pending fulfilled rejected
-  status = "pending"
-  value = null // promise 的值
-  reason = null // reject 需要返回的原因
-  onResolvedCallback = []
-  onRejectedCallback = []
+  status = "pending";
+  value = null; // promise 的值
+  reason = null; // reject 需要返回的原因
+  onResolvedCallback = [];
+  onRejectedCallback = [];
 
   resolve = (value) => {
     if (this.status === "pending") {
-      this.value = value
-      this.status = "fulfilled"
+      this.value = value;
+      this.status = "fulfilled";
       for (let i = 0; i < this.onResolvedCallback.length; i++) {
-        this.onResolvedCallback[i](value)
+        this.onResolvedCallback[i](value);
       }
     }
-  }
+  };
   reject = (reason) => {
     if (this.status === "pending") {
-      this.reason = reason
-      this.status = "rejected"
+      this.reason = reason;
+      this.status = "rejected";
       for (let i = 0; i < this.onRejectedCallback.length; i++) {
-        this.onRejectedCallback[i](value)
+        this.onRejectedCallback[i](value);
       }
     }
-  }
+  };
 
   then = (onFulfilled, onRejected) => {
     if (this.status === "fulfilled") {
-      onFulfilled(this.value)
+      onFulfilled(this.value);
     } else if (this.status === "rejected") {
-      onrejected(this.value)
+      onRejected(this.value);
     }
-  }
+  };
 }

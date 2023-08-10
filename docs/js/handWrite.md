@@ -153,5 +153,122 @@ function instanceof(left, right){
     left = left.__proto__
   }
 }
+```
 
+### 实现并发请求数量控制
+
+实现一个并发请求函数concurrencyRequest(urls, maxNum)，要求如下：
+• 要求最大并发数 maxNum
+• 每当有一个请求返回，就留下一个空位，可以增加新的请求
+• 所有请求完成后，结果按照 urls 里面的顺序依次打出（发送请求的函数可以直接使用fetch即可）
+
+```js
+
+// 并发请求函数
+const concurrencyRequest = (urls, maxNum) => {
+    return new Promise((resolve) => {
+        if (urls.length === 0) {
+            resolve([]);
+            return;
+        }
+        const results = [];
+        let index = 0; // 下一个请求的下标
+        let count = 0; // 当前请求完成的数量
+
+        // 发送请求
+        async function request() {
+            if (index === urls.length) return;
+            const i = index; // 保存序号，使result和urls相对应
+            const url = urls[index];
+            index++;
+            console.log(url);
+            try {
+                const resp = await fetch(url);
+                // resp 加入到results
+                results[i] = resp;
+            } catch (err) {
+                // err 加入到results
+                results[i] = err;
+            } finally {
+                count++;
+                // 判断是否所有的请求都已完成
+                if (count === urls.length) {
+                    console.log('完成了');
+                    resolve(results);
+                }
+                request();
+            }
+        }
+
+        // maxNum和urls.length取最小进行调用
+        const times = Math.min(maxNum, urls.length);
+        for(let i = 0; i < times; i++) {
+            request();
+        }
+    })
+}
+```
+
+### 实现一个Scheduler类，使下面的代码能正确输出。
+要求实现一个具有并发数量限制的异步任务调度器，可以规定最大同时运行的任务。
+
+实现一个Scheduler类，使下面的代码能正确输出。
+
+```js
+// 延迟函数
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+// 同时进行的任务最多2个
+const scheduler = new Scheduler(2);
+
+// 添加异步任务
+// time: 任务执行的时间
+// val: 参数
+const addTask = (time, val) => {
+    scheduler.add(() => {
+        return sleep(time).then(() => console.log(val));
+    });
+};
+
+addTask(1000, '1');
+addTask(500, '2');
+addTask(300, '3');
+addTask(400, '4');
+// 2
+// 3
+// 1
+// 4
+
+```
+代码实现
+```js
+class Scheduler {
+    constructor(max) {
+        // 最大可并发任务数
+        this.max = max;
+        // 当前并发任务数
+        this.count = 0;
+        // 阻塞的任务队列
+        this.queue = [];
+    }
+
+    async add(fn) {
+        if (this.count >= this.max) {
+            // 若当前正在执行的任务，达到最大容量max
+            // 阻塞在此处，等待前面的任务执行完毕后将resolve弹出并执行
+            await new Promise(resolve => this.queue.push(resolve));
+        }
+        // 当前并发任务数++
+        this.count++;
+        // 使用await执行此函数
+        const res = await fn();
+        // 执行完毕，当前并发任务数--
+        this.count--;
+        // 若队列中有值，将其resolve弹出，并执行
+        // 以便阻塞的任务，可以正常执行
+        this.queue.length && this.queue.shift()();
+        // 返回函数执行的结果
+        return res;
+    }
+}
 ```
